@@ -3,7 +3,6 @@ from math import sqrt, cos, pi
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MultipleLocator
 
-
 DEBUGGING = True  # set true to enable some debug graphs and console outputs/dumps 
 
 
@@ -75,7 +74,6 @@ Ths = [[],[],[]]
 Tcs = [[],[],[]]
 hs = [[],[],[]]
 
-
 def dump():
     print("h:   ", h)
     print("g_h: ", g_h)
@@ -87,7 +85,12 @@ for i in range(steps):
     old_h = h.copy()
     for j in range(2):
         #rooms
-        #calculate volume flux, buoyancy in and out of hot layer, if         
+        #calculate volume flux, buoyancy in and out of hot layer, if 
+        #########if h[rm]/H[rm]< 0.999  and (people_leave_work == False or (people_leave_work and (9*3600 <  t%(24*3600) < 17*3600)) ): - is this equiv?
+        
+        if not (people_leave_work and (t%(24*3600) < 9*3600 or  t%(24*3600) > 17*3600) and h[j]/H[j]>0.999):
+            Q_out[j] = A_eff[j]*sqrt((g_h[j]-g_c[j])*(H[j]-h[j]))
+            B_out[j] = g_h[j]*Q_out[j]
 
         Q_out[j] = A_eff[j]*sqrt((g_h[j])*(H[j]-h[j]))
 
@@ -187,8 +190,7 @@ plt.xlabel("Time (hrs)")
 plt.ylabel("Temp (deg C)")
 plt.plot(ts,Ths[1], label="Hot layer")
 plt.plot(ts, Tcs[1], label="Cold layer")
-#plt.gca().xaxis.set_major_locator(MultipleLocator(24)) # makes x-axis tickers every 24 hrs
-plt.xlim(-0.1, 48)                                      # limits graph to only show hour range chosen
+plt.gca().xaxis.set_major_locator(MultipleLocator(24)) # makes x-axis tickers every 24 hrs
 plt.legend()
 plt.show()#temps of layers in floor 1
 
@@ -196,12 +198,10 @@ plt.title("Bottom floor interface height")
 plt.xlabel("Time (hrs)")
 plt.ylabel("Interface height (m)")
 plt.plot(ts,hs[1])
-#plt.gca().xaxis.set_major_locator(MultipleLocator(24)) # as above
-plt.xlim(-0.1, 48)                                      # as above
+plt.gca().xaxis.set_major_locator(MultipleLocator(24)) # as above
 plt.legend()
 plt.show()#interface height, flr 1
 
-'''
 plt.title("Chimney layer temps.")
 plt.xlabel("Time (hrs)")
 plt.ylabel("Temp (deg C)")
