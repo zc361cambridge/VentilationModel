@@ -44,13 +44,13 @@ def g_from_temp(T):
     return g_real*(T-T_night)/(273+T_night)
 
 #setup variables
-h = [0.5*H[0],0.5*H[1],0.9*H[2]]    #interface height - needs initial value < H
-g_real = 9.81                       #gravity on earth
-dt = 1                              #timestep in seconds
-steps = 24*3600*7                   #number of steps
-t_start = 0                         #start time, in seconds past midnight
-g_h = [g_from_temp(T_night+1),g_from_temp(T_night+1),g_from_temp(T_night+1)]             #effective gravity of the hot layer - needs initial value so g isn't 0
-g_c = [0,0,0]                       #effective gravity of the cold layer
+h = [0.5*H[0],0.5*H[1],0.9*H[2]]               #interface height
+g_real = 9.81                   #gravity on earth
+dt = 1                         #timestep in seconds
+steps = 24*3600*7                 #number of steps
+t_start = 0                     #start time, in seconds past midnight
+g_h = [g_from_temp(T_night+1),g_from_temp(T_night+1),g_from_temp(T_night+1)]             #effective gravity of the hot layer
+g_c = [0,0,0]                   #effective gravity of the cold layer
 
 Q_out = [0,0,0]
 Q_in = [0,0,0]
@@ -76,55 +76,54 @@ def dump():
 
 for i in range(steps):
     t=i*dt
-    T_ext = get_ext_temp(t)
     old_h = h.copy()
-    for rm in range(2):
+    for j in range(2):
         #rooms
-        #calculate volume flux, buoyancy in and out of hot layer, if people are in work and interface h is below the ceiling
-
+        #calculate volume flux, buoyancy in and out of hot layer, if 
         #########if h[rm]/H[rm]< 0.999  and (people_leave_work == False or (people_leave_work and (9*3600 <  t%(24*3600) < 17*3600)) ): - is this equiv?
+        
         if not (people_leave_work and (t%(24*3600) < 9*3600 or  t%(24*3600) > 17*3600) and h[j]/H[j]>0.999):
-            Q_out[rm] = A_eff[rm]*sqrt((g_h[rm])*(H[rm]-h[rm]))
-            B_out[rm] = g_h[rm]*Q_out[rm]
+            Q_out[j] = A_eff[j]*sqrt((g_h[j]-g_c[j])*(H[j]-h[j]))
+            B_out[j] = g_h[j]*Q_out[j]
 
             if people_leave_work and (t%(24*3600) < 9*3600 or  t%(24*3600) > 17*3600):
-                Q_in[rm] = 0
-                B_in[rm] = 0
+                Q_in[j] = 0
+                B_in[j] = 0
             else:
-                Q_in[rm] = c*n[rm]*B**(1/3)*h[rm]**(5/3)
-                B_in[rm] = B*n[rm] + g_c[rm]*Q_in[rm] 
+                Q_in[j] = c*n[j]*B**(1/3)*h[j]**(5/3)
+                B_in[j] = B*n[j] + g_c[j]*Q_in[j] 
             
             #apply
             
-            h[rm] -= dt*(Q_in[rm] - Q_out[rm])/S[rm]
-            g_h[rm] = dt*((g_h[rm]*(H[rm]-old_h[rm])*S[rm] + B_in[rm] - B_out[rm])/((H[rm]-h[rm])*S[rm]))
-            g_c[rm] = dt*(g_c[rm]*old_h[rm]*S[rm] + g_from_temp(get_ext_temp(t))*Q_out[rm]-g_c[rm]*Q_in[rm])/(h[rm]*S[rm])
+            h[j] -= dt*(Q_in[j] - Q_out[j])/S[j]
+            g_h[j] = dt*((g_h[j]*(H[j]-old_h[j])*S[j] + B_in[j] - B_out[j])/((H[j]-h[j])*S[j]))
+            g_c[j] = dt*(g_c[j]*old_h[j]*S[j] + g_from_temp(get_ext_temp(t))*Q_out[j]-g_c[j]*Q_in[j])/(h[j]*S[j])
         else:
-            Q_out[rm] = 0
+            Q_out[j] = 0
 
     #chimney
     if not (people_leave_work and (t%(24*3600) < 9*3600 or  t%(24*3600) > 17*3600) and h[2]/H[2]>0.99):
-        rm = 2 #beneficial for debug, don't touch
-        Q_out[rm] = A_eff[rm]*sqrt((g_h[rm]-g_c[rm])*(H[rm]-h[rm]))
-        B_out[rm] = g_h[rm]*Q_out[rm]
+        j = 2 #beneficial for debug, don't touch
+        Q_out[j] = A_eff[j]*sqrt((g_h[j]-g_c[j])*(H[j]-h[j]))
+        B_out[j] = g_h[j]*Q_out[j]
 
         if people_leave_work and (t%(24*3600) < 9*3600 or  t%(24*3600) > 17*3600):
-            Q_in[rm] = Q_out[0] + Q_out[1]
-            B_in[rm] = B_out[0] + B_out[1]
+            Q_in[j] = Q_out[0] + Q_out[1]
+            B_in[j] = B_out[0] + B_out[1]
         else:
-            Q_in[rm] = Q_out[0] + Q_out[1] + c*n[rm]*B**(1/3)*h[rm]**(5/3)
-            B_in[rm] = B_out[0] + B_out[1] + B*n[rm] + g_c[rm]*c*n[rm]*B**(1/3)*h[rm]**(5/3)
+            Q_in[j] = Q_out[0] + Q_out[1] + c*n[j]*B**(1/3)*h[j]**(5/3)
+            B_in[j] = B_out[0] + B_out[1] + B*n[j] + g_c[j]*c*n[j]*B**(1/3)*h[j]**(5/3)
         
         #apply
         
-        h[rm] -= dt*(Q_in[rm] - Q_out[rm])/S[rm]
-        g_h[rm] = dt*((g_h[rm]*(H[rm]-old_h[rm])*S[rm] + B_in[rm] - B_out[rm])/((H[rm]-h[rm])*S[rm]))
-        if Q_out[rm] > Q_out[0] + Q_out[1]:
+        h[j] -= dt*(Q_in[j] - Q_out[j])/S[j]
+        g_h[j] = dt*((g_h[j]*(H[j]-old_h[j])*S[j] + B_in[j] - B_out[j])/((H[j]-h[j])*S[j]))
+        if Q_out[j] > Q_out[0] + Q_out[1]:
             if people_leave_work and (t%(24*3600) < 9*3600 or  t%(24*3600) > 17*3600):
-                g_c[rm] = dt*(g_c[rm]*old_h[rm]*S[rm] + g_from_temp(get_ext_temp(t))*(Q_out[rm]-(Q_out[0] + Q_out[1])))/(h[rm]*S[rm])
+                g_c[j] = dt*(g_c[j]*old_h[j]*S[j] + g_from_temp(get_ext_temp(t))*(Q_out[j]-(Q_out[0] + Q_out[1])))/(h[j]*S[j])
             else:
-                g_c[rm] = dt*(g_c[rm]*old_h[rm]*S[rm] + g_from_temp(get_ext_temp(t))*(Q_out[rm]-(Q_out[0] + Q_out[1]))-g_c[rm]*c*n[rm]*B**(1/3)*h[rm]**(5/3))/(h[rm]*S[rm])
-        if h[rm]<0.01:
+                g_c[j] = dt*(g_c[j]*old_h[j]*S[j] + g_from_temp(get_ext_temp(t))*(Q_out[j]-(Q_out[0] + Q_out[1]))-g_c[j]*c*n[j]*B**(1/3)*h[j]**(5/3))/(h[j]*S[j])
+        if h[j]<0.01:
             print("hot layer in chimney got too low")
             dump()
             break
@@ -174,7 +173,7 @@ plt.ylabel("Interface height (m)")
 plt.plot(ts,hs[1])
 plt.gca().xaxis.set_major_locator(MultipleLocator(24)) # as above
 plt.legend()
-plt.show()#interface height, rm 1
+plt.show()#interface height, flr 1
 
 plt.title("Chimney layer temps.")
 plt.xlabel("Time (hrs)")
