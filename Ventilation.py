@@ -132,16 +132,32 @@ for i in range(steps):
     hs[2].append(h[2])
 
 #plot graphs
-plt.plot(ts,Ths[1])
-plt.plot(ts, Tcs[1])
+plt.title("Floor 1 layer temps.")
+plt.xlabel("Time (hrs)")
+plt.ylabel("Temp (deg C)")
+plt.plot(ts,Ths[1], label="Hot layer")
+plt.plot(ts, Tcs[1], label="Cold layer")
+plt.legend()
 plt.show()#temps of layers in floor 1
 
+plt.title("Floor 1 interface height")
+plt.xlabel("Time (hrs)")
+plt.ylabel("Interface height (m)")
 plt.plot(ts,hs[1])
+plt.legend()
 plt.show()#interface height, flr 1
 
-plt.plot(ts,Ths[2])
-plt.plot(ts, Tcs[2])
+plt.title("Chimney layer temps.")
+plt.xlabel("Time (hrs)")
+plt.ylabel("Temp (deg C)")
+plt.plot(ts,Ths[2], label="Hot layer")
+plt.plot(ts, Tcs[2], label="Cold layer")
+plt.legend()
 plt.show()#temps of layers in chimney
 
+plt.title("Chimney interface height")
+plt.xlabel("Time (hrs)")
+plt.ylabel("Interface height (m)")
 plt.plot(ts,hs[2])
+plt.legend()
 plt.show()#interface height, chimney
