@@ -1,3 +1,7 @@
+
+DEBUGGING = True  # set true to enable some debug graphs and console outputs/dumps 
+
+
 #user defined variables
 
 H = [3,3,10]                     #room height
@@ -54,13 +58,15 @@ B_out = [0,0,0]
 B_in = [0,0,0]
 old_h = [0,0,0]
 #plotting variables
-ts = [i/3600 for i in range(t_start,steps*dt,dt)]
+ts = [i/3600 for i in range(t_start,steps*dt,dt)] # /3600 to convert to hrs for nice plot
 Ths = [[],[],[]]
 Tcs = [[],[],[]]
 hs = [[],[],[]]
 
+import numpy as np
 from math import sqrt, cos, pi
 from matplotlib import pyplot as plt
+from matplotlib.ticker import MultipleLocator
 
 def dump():
     print("h:   ", h)
@@ -132,18 +138,38 @@ for i in range(steps):
     hs[2].append(h[2])
 
 #plot graphs
-plt.title("Floor 1 layer temps.")
+
+# debug graphs
+if DEBUGGING:
+
+    ext_temp_over_day = []
+    for i in ts:
+        ext_temp_over_day.append(get_ext_temp(i*3600))
+
+    plt.title("temp over the day")
+    plt.xlabel("Time (hrs)")
+    plt.ylabel("Temp (deg C)")
+    plt.plot(ts,ext_temp_over_day)
+    plt.yticks(range(0, 30, 2))
+    plt.gca().xaxis.set_major_locator(MultipleLocator(24)) # makes x-axis tickers every 24 hrs
+    plt.legend()
+    plt.show()
+
+
+plt.title("Bottom floor layer temps.")
 plt.xlabel("Time (hrs)")
 plt.ylabel("Temp (deg C)")
 plt.plot(ts,Ths[1], label="Hot layer")
 plt.plot(ts, Tcs[1], label="Cold layer")
+plt.gca().xaxis.set_major_locator(MultipleLocator(24)) # makes x-axis tickers every 24 hrs
 plt.legend()
 plt.show()#temps of layers in floor 1
 
-plt.title("Floor 1 interface height")
+plt.title("Bottom floor interface height")
 plt.xlabel("Time (hrs)")
 plt.ylabel("Interface height (m)")
 plt.plot(ts,hs[1])
+plt.gca().xaxis.set_major_locator(MultipleLocator(24)) # as above
 plt.legend()
 plt.show()#interface height, flr 1
 
@@ -152,6 +178,7 @@ plt.xlabel("Time (hrs)")
 plt.ylabel("Temp (deg C)")
 plt.plot(ts,Ths[2], label="Hot layer")
 plt.plot(ts, Tcs[2], label="Cold layer")
+plt.gca().xaxis.set_major_locator(MultipleLocator(24)) # as above
 plt.legend()
 plt.show()#temps of layers in chimney
 
@@ -159,5 +186,6 @@ plt.title("Chimney interface height")
 plt.xlabel("Time (hrs)")
 plt.ylabel("Interface height (m)")
 plt.plot(ts,hs[2])
+plt.gca().xaxis.set_major_locator(MultipleLocator(24)) # as above
 plt.legend()
 plt.show()#interface height, chimney
