@@ -1,7 +1,3 @@
-
-DEBUGGING = True  # set true to enable some debug graphs and console outputs/dumps 
-
-
 #user defined variables
 
 H = [3,3,10]                     #room height
@@ -141,28 +137,11 @@ for i in range(steps):
 
 #plot graphs
 
-# debug graphs
-if DEBUGGING:
-
-    ext_temp_over_day = []
-    for i in ts:
-        ext_temp_over_day.append(get_ext_temp(i*3600))
-
-    plt.title("temp over the day")
-    plt.xlabel("Time (hrs)")
-    plt.ylabel("Temp (deg C)")
-    plt.plot(ts,ext_temp_over_day)
-    plt.yticks(range(0, 30, 2))
-    plt.gca().xaxis.set_major_locator(MultipleLocator(24)) # makes x-axis tickers every 24 hrs
-    plt.legend()
-    plt.show()
-
-
 plt.title("Bottom floor layer temps.")
 plt.xlabel("Time (hrs)")
 plt.ylabel("Temp (deg C)")
-plt.plot(ts,Ths[1], label="Hot layer")
-plt.plot(ts, Tcs[1], label="Cold layer")
+plt.plot(ts,Ths[0], label="Hot layer")
+plt.plot(ts, Tcs[0], label="Cold layer")
 plt.gca().xaxis.set_major_locator(MultipleLocator(24)) # makes x-axis tickers every 24 hrs
 plt.legend()
 plt.show()#temps of layers in floor 1
@@ -170,9 +149,8 @@ plt.show()#temps of layers in floor 1
 plt.title("Bottom floor interface height")
 plt.xlabel("Time (hrs)")
 plt.ylabel("Interface height (m)")
-plt.plot(ts,hs[1])
+plt.plot(ts,hs[0])
 plt.gca().xaxis.set_major_locator(MultipleLocator(24)) # as above
-plt.legend()
 plt.show()#interface height, flr 1
 
 plt.title("Chimney layer temps.")
@@ -189,5 +167,4 @@ plt.xlabel("Time (hrs)")
 plt.ylabel("Interface height (m)")
 plt.plot(ts,hs[2])
 plt.gca().xaxis.set_major_locator(MultipleLocator(24)) # as above
-plt.legend()
 plt.show()#interface height, chimney
