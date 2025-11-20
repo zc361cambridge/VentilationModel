@@ -6,13 +6,13 @@ from matplotlib.ticker import MultipleLocator
 
 #user defined variables
 H = [3,3]                       #room height
-H_a = 8                         #height of atrium
+H_a = 9                         #height of atrium
 vents = [[1,1],[1,1]]           #vent areas, as [low,high], or equivalently: [in,out]
-vents_a = [3,2]
-h_v = [6.5,3]                   #vent height above ext. vent, in atrium
-S = [100,100]                   #floor area
-S_a = 30
-n = [20,20]                     #num of people
+vents_a = [4,3]
+h_v = [3,6]                     #vent height above ext. vent, in atrium
+S = [60,60]                     #floor area
+S_a = 36
+n = [30,30]                     #num of people
 w = 100                         #power input per person
 T_day = 20                      #max daytime temp
 T_night = 5                     #min nighttime temp
@@ -29,19 +29,19 @@ Room numbering system:
   _______________|     |
  |                     |
  |               |     |
- |       0       |     |
+ |       1       |     |
                  |  a  |
  |_______________|     |
  |                     |
  |               |     |
- |       1       |     |
+ |       0       |     |
                  |      
  |_______________|_____|
 '''
 
 #fundamental variables
 c = 0.15                        #plume entrainment constant
-alpha = c/2                     #plume rises against wall, so halve entrainment
+alpha = c                       #conversion to half line plume
 g_real = 9.81
 rho = 1.225
 
@@ -154,9 +154,9 @@ def main():
             dp[j] = get_dp(h_v[j], g_c, g_h, t, h, H_a)
             dps[j].append(dp[j])
             #dp = 0
-            Q[j] = A_eff[j]*sqrt(abs(g[j]-g_ext-dp[j]/rho)*H[j]) #absolute value
+            Q[j] = A_eff[j]*sqrt(abs((g[j]-g_ext)*H[j]-dp[j]/rho)) #absolute value
             B_out[j] = Q[j]*g[j]
-            if g[j]-g_ext-dp[j]/rho>0:
+            if (g[j]-g_ext)*H[j]-dp[j]/rho>0:
                 #correct flow direction
                 B_in[j] = Q[j]*g_ext
 
@@ -355,7 +355,6 @@ def main():
     plt.title("Delta p")
     plt.xlabel("Time (hrs)")
     plt.ylabel("dp (pa)")
-    plt.plot(ts,throughflows, label="chimney")
     plt.plot(ts,dps[1], label="room 1")
     plt.plot(ts,dps[0], label="room 0")
     plt.gca().xaxis.set_major_locator(MultipleLocator(24))
